@@ -19,6 +19,8 @@ void CMSIS_CS_Enable();
 void CMSIS_CS_Disable();
 void CMSIS_RST_Enable();
 void CMSIS_RST_Disable();
+void CMSIS_DC_Enable();
+void CMSIS_DC_Disable();
 
 #define spi1_RST_Pin GPIO_PIN_0
 #define spi1_RST_GPIO_Port GPIOA
