@@ -33,7 +33,7 @@ void CMSIS_GPIO_init() {
 
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; // Enable GPIO Clock
 
-	GPIOA->MODER |= (1<<0)|(1<<2)|(2<<10)|(2<<14)|(1<<18);  // Alternate functions for PA0,PA1
+	GPIOA->MODER |= (1<<0)|(1<<2)|(2<<10)|(2<<14)|(1<<18);  // Output functions for PA0,PA1,PA9, alternate functions for PA5,PA7
 
 	GPIOA->OSPEEDR |= (3<<0)|(3<<2)|(3<<10)|(3<<14)|(3<<18);  // HIGH Speed for PA0,PA1
 
@@ -66,5 +66,13 @@ void CMSIS_RST_Enable() {
 }
 
 void CMSIS_RST_Disable() {
-	spi1_RST_GPIO_Port->BSRR = (spi1_RST_Pin << 16);
+	spi1_RST_GPIO_Port->BSRR = spi1_RST_Pin;
+}
+
+void CMSIS_DC_Enable() {
+	spi1_DC_GPIO_Port->BSRR = (spi1_DC_Pin << 16);
+}
+
+void CMSIS_DC_Disable() {
+	spi1_DC_GPIO_Port->BSRR = spi1_DC_Pin;
 }

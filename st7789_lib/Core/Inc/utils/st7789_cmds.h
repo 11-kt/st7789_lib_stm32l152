@@ -2,7 +2,7 @@
  * st7789_cmds.h
  *
  *  Created on: Feb 2, 2024
- *      Author: user
+ *      Author: Andrianov Vitaly
  */
 
 #ifndef INC_UTILS_ST7789_CMDS_H_
@@ -26,11 +26,11 @@
 #define 	SLPOUT		0x11
 //- Normal Display Mode  On -//
 #define 	NORON		0x13
-//--- Display Inversion Of --//
+//-- Display Inversion Off --//
 #define 	INVOFF		0x20
 //--- Display Inversion On --//
 #define 	INVON		0x21
-//------- Display Of --------//
+//------- Display Off -------//
 #define 	DISPOFF		0x28
 //------- Display On --------//
 #define 	DISPON		0x29
