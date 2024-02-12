@@ -191,11 +191,7 @@ void st7789_DrawPixel(int16_t x, int16_t y, uint16_t color){
   st7789_RamWrite(&color, 1);
 }
 
-void st7789_DrawChar(
-		uint16_t x, uint16_t y,
-		uint16_t textColor, font_t* font,
-		uint8_t fontIncrease, unsigned char ch
-		) {
+void st7789_DrawChar(uint16_t x, uint16_t y, uint16_t textColor, font_t* font,uint8_t fontIncrease, unsigned char ch) {
 	uint32_t currentChar, nextX, nextY;
 	uint32_t currentX = x, currentY = y;
 
@@ -229,5 +225,20 @@ void st7789_DrawChar(
 			currentX = x;
 			currentY += fontIncrease;
 		}
+	}
+}
+
+void st7789_PrintString(uint16_t x, uint16_t y, uint16_t textColor, font_t* font, uint8_t fontIncrease, char *str) {
+
+	if (fontIncrease < 1) fontIncrease = 1;
+
+	uint16_t len = strlen(str);
+
+	while (len--) {
+		st7789_DrawChar(x, y, textColor, font, fontIncrease, *str);
+
+		x = x + (font->fontWidth * fontIncrease);
+
+		str++;
 	}
 }
