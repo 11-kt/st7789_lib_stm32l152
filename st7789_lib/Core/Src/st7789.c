@@ -30,7 +30,7 @@ void st7789_init() {
 
 	st7789_DisplayOn();
 
-	st7789_FillRect(0, 0,  WIDTH_st7789, HEIGHT_st7789, GREEN_st7789);
+	st7789_FillRect(0, 0,  WIDTH_st7789, HEIGHT_st7789, BLACK_st7789);
 
 	CMSIS_CS_Disable();
 }
@@ -38,7 +38,7 @@ void st7789_init() {
 void st7789_SendData(uint8_t data) {
 	CMSIS_SPI_Enable();
 
-	while( (SPI1->SR & SPI_SR_TXE) == RESET) {}
+	while((SPI1->SR & SPI_SR_TXE) == RESET) {}
 
 	*((__IO uint8_t *) & SPI1->DR) = data;
 
@@ -178,7 +178,56 @@ void st7789_FillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 
   if ((y + h) > HEIGHT_st7789) h = HEIGHT_st7789 - y;
 
-  st7789_SetWindow(x, y, x + w - 1, y + h - 1);
+  st7789_SetWindow(x, y, x + w, y + h);
 
   st7789_RamWrite(&color, (h * w));
+}
+
+void st7789_DrawPixel(int16_t x, int16_t y, uint16_t color){
+  if ((x < 0) ||(x >= WIDTH_st7789) || (y < 0) || (y >= HEIGHT_st7789)) return;
+
+  st7789_SetWindow(x, y, x, y);
+
+  st7789_RamWrite(&color, 1);
+}
+
+void st7789_DrawChar(
+		uint16_t x, uint16_t y,
+		uint16_t textColor, font_t* font,
+		uint8_t fontIncrease, unsigned char ch
+		) {
+	uint32_t currentChar, nextX, nextY;
+	uint32_t currentX = x, currentY = y;
+
+	if (fontIncrease < 1) fontIncrease = 1;
+
+	/* Check LCD space*/
+	if (WIDTH_st7789 >= (x + font->fontWidth) || HEIGHT_st7789 >= (y + font->fontHeight)){
+		/* Go through font */
+		for (uint8_t i = 0; i < font->fontHeight; i++) {
+			/* if eng symbol */
+			if (ch < 127)
+				currentChar = font->data[(ch - 32) * font->fontHeight + i];
+			/* if rus symbol */
+			else if(ch > 191 )
+				currentChar = font->data[((ch - 192) + 96) * font->fontHeight + i];
+			/* if '¨' symbol */
+			else if(ch == 168)
+				currentChar = font->data[(160) * font->fontHeight + i];
+			/* if '¸' symbol */
+			else if(ch == 184)
+				currentChar = font->data[(161) * font->fontHeight + i];
+
+			for (uint8_t j = 0; j < font->fontWidth; j++) {
+				if ((currentChar << j) & 0x8000) {
+					for (nextY = 0; nextY < fontIncrease; nextY++) {
+						for (nextX = 0; nextX < fontIncrease; nextX++) st7789_DrawPixel(currentX+nextX, currentY+nextY, textColor);
+					}
+				}
+				currentX += fontIncrease;
+			}
+			currentX = x;
+			currentY += fontIncrease;
+		}
+	}
 }
