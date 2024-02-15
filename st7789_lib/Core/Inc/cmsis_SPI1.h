@@ -13,6 +13,8 @@
 
 void CMSIS_SPI1_init();
 void CMSIS_GPIO_init();
+void CMSIS_DMA_init();
+
 void CMSIS_SPI_Enable();
 void CMSIS_SPI_Disable();
 void CMSIS_CS_Enable();

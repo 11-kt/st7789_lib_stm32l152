@@ -40,6 +40,11 @@ void st7789_DrawPixel(int16_t x, int16_t y, uint16_t color);
 void st7789_DrawChar(uint16_t x, uint16_t y, uint16_t textColor, font_t* font, uint8_t fontIncrease, unsigned char ch);
 void st7789_print(uint16_t x, uint16_t y, uint16_t textColor, font_t* font, uint8_t fontIncrease, char *str);
 
+
+void st7789_RunDisplayUPD();
+void st7789_FillDisplay(uint16_t color);
+void st7789_StopDispayUPD();
+
 #define		rgb565(r, g, b)		(((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3))
 
 #endif /* INC_ST7789_H_ */

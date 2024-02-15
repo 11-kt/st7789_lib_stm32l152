@@ -6,6 +6,7 @@
  */
 
 #include "st7789.h"
+uint8_t buff_frame[120*160*2];
 
 void st7789_init() {
 	CMSIS_CS_Enable();
@@ -30,9 +31,51 @@ void st7789_init() {
 
 	st7789_DisplayOn();
 
-	st7789_FillRect(0, 0,  WIDTH_st7789, HEIGHT_st7789, BLACK_st7789);
+	st7789_FillRect(0, 0,  WIDTH_st7789, HEIGHT_st7789, WHITE_st7789);
 
 	CMSIS_CS_Disable();
+
+	st7789_SetWindow(0, 0, 120, 160);
+	st7789_FillDisplay(YELLOW_st7789);
+	st7789_RunDisplayUPD();
+//	st7789_StopDispayUPD();
+
+	HAL_Delay(25);
+
+	st7789_SetWindow(120, 0, 240, 160);
+	st7789_FillDisplay(RED_st7789);
+	st7789_RunDisplayUPD();
+	//	st7789_StopDispayUPD();
+
+	HAL_Delay(25);
+
+	st7789_SetWindow(120, 160, 240, 320);
+	st7789_FillDisplay(GREEN_st7789);
+	st7789_RunDisplayUPD();
+//	st7789_StopDispayUPD();
+
+	HAL_Delay(25);
+
+	st7789_SetWindow(0, 160, 120, 320);
+	st7789_FillDisplay(MAGENTA_st7789);
+	st7789_RunDisplayUPD();
+
+	HAL_Delay(25);
+//
+//	int i = 60;
+//	for (i=60; i < 100; i++) {
+//		st7789_DrawPixel_DMA(i, i, BLUE_st7789, 120, 160);
+//	}
+////	st7789_FillDisplay(MAGENTA_st7789);
+//	st7789_RunDisplayUPD();
+//
+//	HAL_Delay(25);
+//	st7789_SetWindow(50, 50, 100, 100);
+//	st7789_DrawChar_DMA(0, 0, BLACK_st7789, &font_7x9, 3, 'A', 50, 50);
+//	st7789_RunDisplayUPD();
+//
+//	HAL_Delay(25);
+//	st7789_DrawChar(110, 110, BLACK_st7789, &font_7x9, 3, 'A');
 }
 
 void st7789_SendData(uint8_t data) {
@@ -242,3 +285,95 @@ void st7789_PrintString(uint16_t x, uint16_t y, uint16_t textColor, font_t* font
 		str++;
 	}
 }
+
+//TEST DMA
+
+void st7789_RunDisplayUPD() {
+	DMA1_Channel3->CCR &= ~(DMA_CCR_EN); // DMA off
+
+	DMA1_Channel3->CPAR = (uint32_t)&(SPI1->DR); // spi1 data reg to dma
+
+	DMA1_Channel3->CMAR = (uint32_t)&(buff_frame); // data adr
+
+	DMA1_Channel3->CNDTR = sizeof(buff_frame); // data size
+
+	DMA1->IFCR &= ~(DMA_IFCR_CGIF3);
+
+	CMSIS_CS_Enable();
+
+//	DMA1_Channel3->CCR |= DMA_CCR_CIRC; // CIRC mode DMA
+
+	DMA1_Channel3->CCR |= DMA_CCR_EN; // DMA on
+}
+
+void st7789_StopDispayUPD() {
+
+	// wait until all data is sent (count becomes 0)
+	while (DMA1_Channel3->CNDTR != 0) {};
+	// Wait until tx buffer is empty (not set)
+	while (!((SPI1->SR & SPI_SR_TXE) == RESET));
+	// Wait until bus is not busy
+	while((SPI1->SR & (SPI_SR_TXE | SPI_SR_BSY)) != SPI_SR_TXE) {};
+
+	DMA1_Channel3->CCR &= ~(DMA_CCR_EN); // DMA off
+
+	DMA1_Channel3->CCR &= ~DMA_CCR_CIRC; //CIRC mode off
+
+	CMSIS_CS_Disable();
+}
+
+void st7789_FillDisplay(uint16_t color) {
+	uint8_t color_high = (color>>8);
+	uint8_t color_low = color;
+	for (int i=0; i < sizeof(buff_frame) - 2; i = i+2) {
+		buff_frame[i] = color_high;
+		buff_frame[i+1] = color_low;
+	}
+}
+
+//void st7789_DrawPixel_DMA(int16_t x, int16_t y, uint16_t color, uint16_t win_Width, uint16_t win_Height) {
+//	uint8_t color_high = (color>>8);
+//	uint8_t color_low = color;
+//
+//	if ((x < 0) || (x >= win_Width) || (y < 0) || (y >= win_Height)) return;
+//
+//	buff_frame[y * win_Width * 2 + x] = color_high;
+//	buff_frame[y * win_Width * 2 + x + 1] = color_low;
+//}
+//
+//void st7789_DrawChar_DMA(uint16_t x, uint16_t y, uint16_t textColor, font_t* font,uint8_t fontIncrease, unsigned char ch, uint16_t win_Width, uint16_t win_Height) {
+//	uint32_t currentChar, nextX, nextY;
+//	uint32_t currentX = x, currentY = y;
+//
+//	if (fontIncrease < 1) fontIncrease = 1;
+//
+//	/* Check LCD space*/
+//	if (win_Width >= (x + font->fontWidth) || win_Height >= (y + font->fontHeight)){
+//		/* Go through font */
+//		for (uint8_t i = 0; i < font->fontHeight; i++) {
+//			/* if eng symbol */
+//			if (ch < 127)
+//				currentChar = font->data[(ch - 32) * font->fontHeight + i];
+//			/* if rus symbol */
+//			else if(ch > 191 )
+//				currentChar = font->data[((ch - 192) + 96) * font->fontHeight + i];
+//			/* if '¨' symbol */
+//			else if(ch == 168)
+//				currentChar = font->data[(160) * font->fontHeight + i];
+//			/* if '¸' symbol */
+//			else if(ch == 184)
+//				currentChar = font->data[(161) * font->fontHeight + i];
+//
+//			for (uint8_t j = 0; j < font->fontWidth; j++) {
+//				if ((currentChar << j) & 0x8000) {
+//					for (nextY = 0; nextY < fontIncrease; nextY++) {
+//						for (nextX = 0; nextX < fontIncrease; nextX++) st7789_DrawPixel_DMA(currentX+nextX, currentY+nextY, textColor, win_Width, win_Height);
+//					}
+//				}
+//				currentX += fontIncrease;
+//			}
+//			currentX = x;
+//			currentY += fontIncrease;
+//		}
+//	}
+//}
