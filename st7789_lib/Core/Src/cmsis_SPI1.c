@@ -25,7 +25,7 @@ void CMSIS_SPI1_init() {
 
 	SPI1->CR1 &= ~(1<<11);  // DFF=0, 8 bit data
 
-	SPI1->CR2 = 0;
+	SPI1->CR2 |= (1<<1); // TX DMA ena
 
 }
 
@@ -39,6 +39,18 @@ void CMSIS_GPIO_init() {
 
 	GPIOA->AFR[0] |= (5<<20)|(5<<28);   // AF5(SPI1) for PA5,PA7
 
+}
+
+void CMSIS_DMA_init() {
+	RCC->AHBENR |= RCC_AHBENR_DMA1EN;
+
+	DMA1_Channel3->CCR |= DMA_CCR_PSIZE_0; // Peripheral width 1 byte
+
+	DMA1_Channel3->CCR |= DMA_CCR_DIR; // Mem to periph
+
+	DMA1_Channel3->CCR |= DMA_CCR_MINC; // Mem inc on
+
+	DMA1_Channel3->CCR |= DMA_CCR_PL; // High priority DMA
 }
 
 void CMSIS_SPI_Enable() {
