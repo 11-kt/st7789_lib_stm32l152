@@ -8,7 +8,7 @@
 #ifndef INC_UTILS_ST7789_CMDS_H_
 #define INC_UTILS_ST7789_CMDS_H_
 
-//------------------ Команды st7789 ------------------//
+//----- st7789 commands -----//
 //--- Read Display MADCTL ---//
 #define 	MADCTL_MY	0x80 // Row Address Order
 #define 	MADCTL_MX	0x40 // Column Address Order
@@ -44,6 +44,6 @@
 #define 	COLMOD		0x3A
 //--- Read Display MADCTL ---//
 #define 	MADCTL		0x36
-//----------------------------------------------------//
+//---------------------------//
 
 #endif /* INC_UTILS_ST7789_CMDS_H_ */
