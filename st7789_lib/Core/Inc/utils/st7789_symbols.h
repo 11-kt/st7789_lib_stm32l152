@@ -13,18 +13,24 @@
 #include "stdlib.h"
 #include "stm32l1xx.h"
 
+/**
+  * font struct (font width and heigh + data)
+ */
 typedef struct {
 	uint8_t fontWidth;
 	uint8_t fontHeight;
 	const uint16_t *data;
 } font_t;
 
+/**
+  * font size struct (string length and height)
+ */
 typedef struct {
 	uint16_t str_length;
 	uint16_t str_height;
 } fonts_size_t;
 
-char* st7789_symbols_getStringSize(char* str, fonts_size_t* sizeStruct, font_t* font);
+char* st7789_symbols_getStringSize(char* str, fonts_size_t* sizeStruct, font_t* font);	// get String size
 
 extern font_t font_7x9;
 
