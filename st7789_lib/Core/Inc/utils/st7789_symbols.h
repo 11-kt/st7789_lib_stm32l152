@@ -32,6 +32,6 @@ typedef struct {
 
 char* st7789_symbols_getStringSize(char* str, fonts_size_t* sizeStruct, font_t* font);	// get String size
 
-extern font_t font_7x9;
+extern font_t font_11x18;
 
 #endif /* INC_UTILS_ST7789_SYMBOLS_H_ */
